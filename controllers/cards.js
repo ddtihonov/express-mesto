@@ -35,8 +35,8 @@ const deleteCard = (req, res) => {
     })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err === 'CastError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан некорректный _id' });
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Передан некорректный _id' });
         return;
       }
 
@@ -55,8 +55,8 @@ const likeCard = (req, res) => {
     })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Введены некорректиные данные' });
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Передан некорректный _id' });
         return;
       }
 
@@ -75,8 +75,8 @@ const dislikeCard = (req, res) => {
     })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Введены некорректиные данные' });
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Передан некорректный _id' });
         return;
       }
 

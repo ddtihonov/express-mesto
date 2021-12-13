@@ -21,7 +21,7 @@ const getUserById = (req, res) => {
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       if (err === 'CastError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Некоректный _id пользователя' });
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
 
@@ -50,6 +50,10 @@ const updateUserInfo = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
     .orFail(() => {
       res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Нет пользователя с таким _id' });
@@ -62,7 +66,7 @@ const updateUserInfo = (req, res) => {
       }
 
       if (err === 'CastError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Некоректный _id пользователя' });
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
 
@@ -76,6 +80,10 @@ const updateAvatar = (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
     .orFail(() => {
       res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Нет пользователя с таким _id' });
@@ -88,7 +96,7 @@ const updateAvatar = (req, res) => {
       }
 
       if (err === 'CastError') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Некоректный _id пользователя' });
+        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
 
@@ -102,5 +110,4 @@ module.exports = {
   createUser,
   updateUserInfo,
   updateAvatar,
-
 };
