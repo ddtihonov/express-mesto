@@ -9,7 +9,7 @@ const {
 } = require('../controllers/users');
 
 router.get('/', getAllUsers);
-router.get('/:id', getUserById);
+router.get('/:userId', getUserById);
 router.post('/', createUser);
 router.patch('/me', updateUserInfo);
 router.patch('/me/avatar', updateAvatar);

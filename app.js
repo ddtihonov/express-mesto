@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
@@ -11,8 +10,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.use((req, res, next) => {
   req.user = {
     _id: '61af525f06eb663188b835af',
@@ -23,8 +20,6 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
-
-
 
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
