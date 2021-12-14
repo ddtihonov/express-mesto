@@ -20,7 +20,7 @@ const getUserById = (req, res) => {
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
@@ -65,7 +65,7 @@ const updateUserInfo = (req, res) => {
         return;
       }
 
-      if (err === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
@@ -95,7 +95,7 @@ const updateAvatar = (req, res) => {
         return;
       }
 
-      if (err === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
         return;
       }
