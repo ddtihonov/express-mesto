@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const isEmail = require('validator/lib/isEmail');
+const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { regexUrl } = require('../utils/variables');
 
 const userSchema = new mongoose.Schema({
 
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator: (avatar) => /ht{1,2}ps?:\/\/[a-z0-9\\-]+\.[a-z0-9]{2,3}\S*/.test(avatar),
+      validator: (avatar) => regexUrl.test(avatar),
       message: 'Ссылка некорректна!',
     },
   },
@@ -29,20 +30,20 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: (v) => isEmail(v),
+      validator: (email) => validator.isEmail(email),
       message: 'Неправильный формат почты',
     },
   },
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 8,
     select: false,
   },
 });
 
 // проверка почты и пароля
-userSchema.statics.findUserByCredentials = (email, password) => {
+userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
   .then((user) => {
     if (!user) {

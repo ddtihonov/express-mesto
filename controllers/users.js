@@ -1,37 +1,50 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const AuthentificationError = require('../errors/AuthentificationError')
+const NotFoundError = require('../errors/NotFoundError')
+const IncorrectDataError = require('../errors/IncorrectDataError')
+const EmailError = require('../errors/EmailError')
 
-const {
-  ERROR_CODE_INCORRET_DATA,
-  ERROR_CODE_NOT_FOUND,
-  ERROR_CODE_DEFAULT_MISTAKE,
-} = require('../utils/variables');
+const login = (req, res, next) => {
+  const { email, password } = req.body;
 
-const getAllUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send({ users }))
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      });
+      res.status(200).send({ token });
+    })
     .catch(() => {
-      res.status(ERROR_CODE_DEFAULT_MISTAKE).send({ message: 'Ошибка сервера' });
+      next(new AuthentificationError('Неправильные почта или пароль'));
     });
 };
 
-const getUserById = (req, res) => {
-  User.findById(req.params.userId)
+const getAllUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.status(200).send({ users }))
+    .catch(next);
+};
+
+const getUserById = (req, res, next) => {
+  User.findById(req.params.userId ? req.params.userId : req.user._id)
     .orFail(() => {
-      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Нет пользователя с таким _id' });
+      throw new NotFoundError ('Нет пользователя с таким _id' );
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
-        return;
+        if (err.name === 'CastError') {
+          throw new IncorrectDataError ('Некоректный _id пользователя');
       }
-
-      res.status(ERROR_CODE_DEFAULT_MISTAKE).send({ message: 'Ошибка сервера' });
-    });
+    })
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -48,19 +61,17 @@ const createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Введены некорректиные данные' });
-        return;
+        throw new IncorrectDataError('Введены некорректиные данные');
       }
 
       if (err.name === 'MongoError' && err.code === 11000) {
-        res.send({ message: 'Пользователь с таким email уже зарегестрирован' });
+        throw new EmailError ('Пользователь с таким email уже зарегестрирован');
       }
-
-      res.status(ERROR_CODE_DEFAULT_MISTAKE).send({ message: 'Ошибка сервера' });
-    });
+    })
+    .catch(next);
 };
 
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -72,25 +83,21 @@ const updateUserInfo = (req, res) => {
     },
   )
     .orFail(() => {
-      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Нет пользователя с таким _id' });
+      throw new NotFoundError ('Нет пользователя с таким _id' );
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Введены некорректиные данные' });
-        return;
+        throw new IncorrectDataError ('Введены некорректиные данные');
       }
-
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
-        return;
+        throw new IncorrectDataError ('Некоректный _id пользователя');
       }
-
-      res.status(ERROR_CODE_DEFAULT_MISTAKE).send({ message: 'Ошибка сервера' });
-    });
+    })
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -102,22 +109,19 @@ const updateAvatar = (req, res) => {
     },
   )
     .orFail(() => {
-      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Нет пользователя с таким _id' });
+      throw new NotFoundError ('Нет пользователя с таким _id' );
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Введены некорректиные данные' });
-        return;
+        throw new IncorrectDataError ('Введены некорректиные данные');
       }
 
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_INCORRET_DATA).send({ message: 'Некоректный _id пользователя' });
-        return;
+        throw new IncorrectDataError ('Некоректный _id пользователя');
       }
-
-      res.status(ERROR_CODE_DEFAULT_MISTAKE).send({ message: 'Ошибка сервера' });
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
@@ -126,4 +130,5 @@ module.exports = {
   createUser,
   updateUserInfo,
   updateAvatar,
+  login,
 };
