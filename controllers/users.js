@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const AuthentificationError = require('../errors/AuthentificationError')
-const NotFoundError = require('../errors/NotFoundError')
-const IncorrectDataError = require('../errors/IncorrectDataError')
-const EmailError = require('../errors/EmailError')
+const AuthentificationError = require('../errors/AuthentificationError');
+const NotFoundError = require('../errors/NotFoundError');
+const IncorrectDataError = require('../errors/IncorrectDataError');
+const EmailError = require('../errors/EmailError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
