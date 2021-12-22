@@ -1,27 +1,29 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const AuthentificationError = require('../errors/AuthentificationError');
 const NotFoundError = require('../errors/NotFoundError');
 const IncorrectDataError = require('../errors/IncorrectDataError');
 const EmailError = require('../errors/EmailError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
+  const { NODE_ENV, JWT_SECRET } = process.env;
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('jwt', token, {
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' });
+      return res
+      .cookie('token', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
         sameSite: true,
-      });
-      res.status(200).send({ token });
+      })
+      .status(200)
+      .send({ message: 'Авторизация прошла успешно!'});
     })
-    .catch(() => {
-      next(new AuthentificationError('Неправильные почта или пароль'));
-    });
+    .catch(next);
 };
 
 const getAllUsers = (req, res, next) => {
@@ -48,6 +50,9 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+  if (!email || !password || password.length < 8) {
+    throw new AuthorizationError('Неправильные почта или пароль');
+  }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,

@@ -36,7 +36,6 @@ const deleteCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new IncorrectDataError ('Передан некорректный _id');
-        return;
       }
     })
     .catch(next);
