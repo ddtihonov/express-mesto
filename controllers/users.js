@@ -4,6 +4,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const IncorrectDataError = require('../errors/IncorrectDataError');
 const EmailError = require('../errors/EmailError');
+const AuthorizationError = require('../errors/AuthorizationError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -68,7 +69,6 @@ const createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new IncorrectDataError('Введены некорректиные данные');
       }
-
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new EmailError ('Пользователь с таким email уже зарегестрирован');
       }
