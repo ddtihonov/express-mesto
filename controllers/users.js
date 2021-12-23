@@ -4,7 +4,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const IncorrectDataError = require('../errors/IncorrectDataError');
 const EmailError = require('../errors/EmailError');
-const AuthorizationError = require('../errors/AuthorizationError');
+const AuthentificationError = require('../errors/AuthentificationError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -52,7 +52,7 @@ const createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!email || !password || password.length < 8) {
-    throw new AuthorizationError('Неправильные почта или пароль');
+    throw new AuthentificationError('Неправильные почта или пароль');
   }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
@@ -92,10 +92,11 @@ const updateUserInfo = (req, res, next) => {
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.message === 'Нет пользователя с таким _id') {
+        throw new NotFoundError('Нет пользователя с таким _id');
+      } else if (err.name === 'ValidationError') {
         throw new IncorrectDataError ('Введены некорректиные данные');
-      }
-      if (err.name === 'CastError') {
+      } else if (err.name === 'CastError') {
         throw new IncorrectDataError ('Некоректный _id пользователя');
       }
     })
@@ -118,11 +119,11 @@ const updateAvatar = (req, res, next) => {
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.message === 'Нет пользователя с таким _id') {
+        throw new NotFoundError('Нет пользователя с таким _id');
+      } else if (err.name === 'ValidationError') {
         throw new IncorrectDataError ('Введены некорректиные данные');
-      }
-
-      if (err.name === 'CastError') {
+      } else if (err.name === 'CastError') {
         throw new IncorrectDataError ('Некоректный _id пользователя');
       }
     })

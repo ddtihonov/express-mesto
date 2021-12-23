@@ -34,8 +34,10 @@ const deleteCard = (req, res, next) => {
       res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new IncorrectDataError ('Передан некорректный _id');
+      if (err.message === 'Нет карточки с таким _id') {
+        throw new NotFoundError('Нет карточки с таким _id');
+      } else if (err.name === 'CastError') {
+        throw new IncorrectDataError('Передан некорректный _id');
       }
     })
     .catch(next);
@@ -52,8 +54,10 @@ const likeCard = (req, res, next) => {
     })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new IncorrectDataError ('Передан некорректный _id');
+      if (err.message === 'Нет карточки с таким _id') {
+        throw new NotFoundError('Нет карточки с таким _id');
+      } else if (err.name === 'CastError') {
+        throw new IncorrectDataError('Передан некорректный _id');
       }
     })
     .catch(next);
@@ -70,8 +74,10 @@ const dislikeCard = (req, res, next) => {
     })
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new IncorrectDataError ('Передан некорректный _id');
+      if (err.message === 'Нет карточки с таким _id') {
+        throw new NotFoundError('Нет карточки с таким _id');
+      } else if (err.name === 'CastError') {
+        throw new IncorrectDataError('Передан некорректный _id');
       }
     })
     .catch(next);
