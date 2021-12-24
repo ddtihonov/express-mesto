@@ -40,8 +40,10 @@ const getUserById = (req, res, next) => {
     })
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-        if (err.name === 'CastError') {
-          throw new IncorrectDataError ('Некоректный _id пользователя');
+      if (err.message === 'Нет пользователя с таким _id') {
+        throw new NotFoundError('Нет пользователя с таким _id');
+      } else if (err.name === 'CastError') {
+        throw new IncorrectDataError ('Некоректный _id пользователя');
       }
     })
     .catch(next);

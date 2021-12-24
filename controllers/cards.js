@@ -23,15 +23,18 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .orFail(() => {
       throw new NotFoundError ('Нет карточки с таким _id');
     })
     .then((card) => {
       if (String(card.owner) !== req.user._id) {
-        throw new AuthorizationError('Нельзя удалить чужую карточку');
+        next(new AuthorizationError('Нельзя удалить чужую карточку'));
+      }else {
+        card.remove()
+          .then(() => res.status(200).send(card))
+          .catch(next);
       }
-      res.status(200).send({ card });
     })
     .catch((err) => {
       if (err.message === 'Нет карточки с таким _id') {
