@@ -6,6 +6,7 @@ const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
 require('dotenv').config();
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -21,6 +22,8 @@ app.use(cookieParser());
 app.use(helmet());
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(requestLogger); // подключаем логгер запросов
 
 // роуты, не требующие авторизации
 app.post('/signin',
@@ -55,6 +58,8 @@ app.use(errors());
 app.use((req, res, next) => {
   next(new NotFoundError('Нет такой страницы'));
 });
+
+app.use(errorLogger); // подключаем логгер ошибок - после роутов и до обработчиков ошибок
 
 app.use((err, req, res, next) => {
   res.status(err.statusCode).send({
