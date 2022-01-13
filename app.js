@@ -6,7 +6,7 @@ const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
 require('dotenv').config();
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { requestLogger, errorLogger } = require('./middlewares/Logger');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
